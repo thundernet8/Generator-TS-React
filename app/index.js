@@ -17,7 +17,8 @@ const prettierConfig = {
     parser: "json"
 };
 
-function copyFile(from, to) {
+function copyFolder(from, to) {
+    from += "/**/*.*";
     vfs.src(from).pipe(vfs.dest(to));
 }
 
@@ -132,22 +133,33 @@ module.exports = class extends Generator {
         );
 
         ["build", "config", "src", "typings"].forEach(function(folder) {
-            copyFile(
+            copyFolder(
                 path.resolve(templateFolder, folder + "/**/*.*"),
                 path.resolve(baseDir, folder)
             );
         });
 
-        ["postcss.config.js", "tsconfig.json"][
-            ("babelrc",
+        ["postcss.config.js", "tsconfig.json"].forEach(function(file) {
+            copyFolder(
+                path.resolve(templateFolder, file),
+                path.resolve(baseDir)
+            );
+        });
+
+        [
+            "babelrc",
             "gitignore",
             "prettierrc",
             "stylelintrc",
-            "tslintrc.json")
+            "tslintrc.json"
         ].forEach(function(file) {
-            copyFile(path.resolve(templateFolder, file), path.resolve(baseDir));
-            fs.renameSync(
-                path.resolve(baseDir, file),
+            // copyFile(path.resolve(templateFolder, file), path.resolve(baseDir));
+            // fs.renameSync(
+            //     path.resolve(baseDir, file),
+            //     path.resolve(baseDir, "." + file)
+            // );
+            fs.copyFileSync(
+                path.resolve(templateFolder, file),
                 path.resolve(baseDir, "." + file)
             );
         });

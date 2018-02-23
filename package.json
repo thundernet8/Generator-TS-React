@@ -1,7 +1,8 @@
 {
     "name": "generator-ts-react",
     "version": "1.1.2",
-    "description": "A yeoman generator of helping to init your React/TypeScript project",
+    "description":
+        "A yeoman generator of helping to init your React/TypeScript project",
     "main": "index.js",
     "repository": "git@github.com:thundernet8/Generator-TS-React.git",
     "author": "wuxueqian <wuxueqian2010@hotmail.com>",
@@ -13,9 +14,10 @@
         "webpack",
         "boilerplate"
     ],
-    "files": [
-        "app"
-    ],
+    "files": ["app"],
+    "scripts": {
+        "lint": "eslint --ext .js app/index.js"
+    },
     "dependencies": {
         "chalk": "^2.3.1",
         "get-installed-path": "^4.0.8",
@@ -24,5 +26,10 @@
         "prompt": "^1.0.0",
         "vinyl-fs": "^3.0.2",
         "yeoman-generator": "^2.0.3"
+    },
+    "devDependencies": {
+        "eslint": "^4.18.1",
+        "eslint-config-airbnb-base": "^12.1.0",
+        "eslint-plugin-import": "^2.9.0"
     }
 }
