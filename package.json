@@ -1,0 +1,28 @@
+{
+    "name": "generator-ts-react",
+    "version": "1.0.0",
+    "description": "A yeoman generator of helping to init your React/TypeScript project",
+    "main": "index.js",
+    "repository": "git@github.com:thundernet8/Generator-TS-React.git",
+    "author": "wuxueqian <wuxueqian2010@hotmail.com>",
+    "license": "MIT",
+    "keywords": [
+        "yeoman-generator",
+        "react",
+        "typescript",
+        "webpack",
+        "boilerplate"
+    ],
+    "files": [
+        "app"
+    ],
+    "dependencies": {
+        "chalk": "^2.3.1",
+        "get-installed-path": "^4.0.8",
+        "mkdirp": "^0.5.1",
+        "prettier": "^1.10.2",
+        "prompt": "^1.0.0",
+        "vinyl-fs": "^3.0.2",
+        "yeoman-generator": "^2.0.3"
+    }
+}
