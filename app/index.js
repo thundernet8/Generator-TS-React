@@ -138,16 +138,18 @@ module.exports = class extends Generator {
             );
         });
 
-        [
-            ".babelrc",
-            ".gitignore",
-            ".prettierrc",
-            ".stylelintrc",
-            ".tslintrc.json",
-            "postcss.config.js",
-            "tsconfig.json"
+        ["postcss.config.js", "tsconfig.json"][
+            ("babelrc",
+            "gitignore",
+            "prettierrc",
+            "stylelintrc",
+            "tslintrc.json")
         ].forEach(function(file) {
             copyFile(path.resolve(templateFolder, file), path.resolve(baseDir));
+            fs.renameSync(
+                path.resolve(baseDir, file),
+                path.resolve(baseDir, "." + file)
+            );
         });
     }
 
