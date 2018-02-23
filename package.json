@@ -1,6 +1,6 @@
 {
     "name": "generator-ts-react",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "description": "A yeoman generator of helping to init your React/TypeScript project",
     "main": "index.js",
     "repository": "git@github.com:thundernet8/Generator-TS-React.git",
@@ -16,9 +16,6 @@
     "files": [
         "app"
     ],
-    "scripts": {
-        "postinstall": "npm install"
-    },
     "dependencies": {
         "chalk": "^2.3.1",
         "get-installed-path": "^4.0.8",
