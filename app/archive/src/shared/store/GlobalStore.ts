@@ -2,12 +2,11 @@ import { observable, action, computed } from "mobx";
 import { IStoreArgument } from "../interface/IStoreArgument";
 import AbstractStore from "./AbstractStore";
 import { IS_NODE } from "../../../config/env";
-import { FetchProfile } from "../api/Profile";
 
 declare var window;
 
 /**
- * 全局Store(单例)
+ * Global store
  */
 export default class GlobalStore extends AbstractStore {
     public static API_BASE: string = "";
@@ -19,7 +18,7 @@ export default class GlobalStore extends AbstractStore {
     }
 
     /**
-     * @param arg SSR环境下组件生命周期之前实例化store, 见ssr/render.ts
+     * @param arg
      */
     public static getInstance(arg: IStoreArgument = {} as IStoreArgument) {
         if (!GlobalStore.instance) {
@@ -32,7 +31,7 @@ export default class GlobalStore extends AbstractStore {
         super(arg);
 
         if (!IS_NODE) {
-            // 浏览器端从全局InitialState中初始化Store
+            // SSR data saved in InitialState and used by browser
             const initialState = window.__INITIAL_STATE__ || {};
             if (initialState && initialState.globalStore) {
                 this.fromJSON(initialState.globalStore);
@@ -53,23 +52,15 @@ export default class GlobalStore extends AbstractStore {
         GlobalStore.instance = null as any;
     }
 
-    @observable profile: any;
-
     @observable loading: boolean = false;
 
+    @observable exampleData;
+
     @action
-    fetchProfile = (username: string) => {
-        if (this.loading) {
-            return Promise.reject(false);
-        }
-        this.loading = true;
-        return FetchProfile({ username })
-            .then(resp => {
-                this.profile = resp;
-            })
-            .finally(() => {
-                this.loading = false;
-            });
+    fetchExampleData = () => {
+        return Promise.resolve("example").then(result => {
+            this.exampleData = result;
+        });
     };
 
     @computed
@@ -80,42 +71,19 @@ export default class GlobalStore extends AbstractStore {
         return `${location.protocol}//${location.host}${location.pathname}`;
     }
 
-    @computed
-    get totalStars() {
-        const { profile } = this;
-        if (!profile || !profile.starsPerLan) {
-            return 0;
-        }
-        return profile.starsPerLan.reduce((previous, current) => {
-            return previous + current.stars;
-        }, 0);
-    }
-
-    @computed
-    get totalCommits() {
-        const { profile } = this;
-        if (!profile || !profile.commitsPerLan) {
-            return 0;
-        }
-        return profile.commitsPerLan.reduce((previous, current) => {
-            return previous + current.count;
-        }, 0);
-    }
-
     /**
-     * SSR数据初始化(必须返回promise)
+     * fetch data before ssr
      */
     fetchData() {
-        const { username } = this.Match.params;
         const promises: Promise<any>[] = [];
-        promises.push(this.fetchProfile(username));
+        promises.push(this.fetchExampleData());
         return Promise.all(promises);
     }
 
     public toJSON() {
         const obj = super.toJSON();
         return Object.assign(obj, {
-            profile: this.profile
+            exampleData: "example"
         });
     }
 
@@ -124,9 +92,9 @@ export default class GlobalStore extends AbstractStore {
         if (!json) {
             return this;
         }
-        const { profile } = json;
-        if (typeof profile !== "undefined") {
-            this.profile = profile;
+        const { exampleData } = json;
+        if (typeof exampleData !== "undefined") {
+            this.exampleData = exampleData;
         }
         return this;
     }

@@ -25,10 +25,8 @@ export default abstract class AbstractStore {
         this.location = arg.location;
     }
 
-    // SSR 预加载数据
     abstract fetchData(): Promise<any>;
 
-    // 序列化(转换成plain object, 继承类中继续添加数据)
     public toJSON(): object {
         const { match, location, cookies } = this;
         return {
@@ -38,7 +36,6 @@ export default abstract class AbstractStore {
         };
     }
 
-    // 反序列化(先创建一个空实例，并使用此方法从json中获取信息填充)
     public fromJSON(json: any): AbstractStore {
         if (!json) {
             return this;
