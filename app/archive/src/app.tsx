@@ -2,7 +2,6 @@ import * as React from "react";
 import * as ReactDOM from "react-dom";
 import { BrowserRouter, Route, Switch, Redirect } from "react-router-dom";
 import { Provider } from "mobx-react";
-// import PageLoader from "common/pageLoader";
 import routes from "./routes";
 import { IS_NODE } from "../config/env";
 
