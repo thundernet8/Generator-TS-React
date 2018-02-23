@@ -134,7 +134,7 @@ module.exports = class extends Generator {
 
         ["build", "config", "src", "typings"].forEach(function(folder) {
             copyFolder(
-                path.resolve(templateFolder, folder + "/**/*.*"),
+                path.resolve(templateFolder, folder),
                 path.resolve(baseDir, folder)
             );
         });
