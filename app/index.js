@@ -140,7 +140,7 @@ module.exports = class extends Generator {
         });
 
         ["postcss.config.js", "tsconfig.json"].forEach(function(file) {
-            copyFolder(
+            fs.copyFileSync(
                 path.resolve(templateFolder, file),
                 path.resolve(baseDir)
             );
@@ -153,11 +153,6 @@ module.exports = class extends Generator {
             "stylelintrc",
             "tslintrc.json"
         ].forEach(function(file) {
-            // copyFile(path.resolve(templateFolder, file), path.resolve(baseDir));
-            // fs.renameSync(
-            //     path.resolve(baseDir, file),
-            //     path.resolve(baseDir, "." + file)
-            // );
             fs.copyFileSync(
                 path.resolve(templateFolder, file),
                 path.resolve(baseDir, "." + file)
