@@ -22,7 +22,7 @@
             }
         ],
         "semi": [2, "always"],
-        "quotes": [2, "double"],
+        "quotes": [2, "single"],
         "comma-dangle": [1, "never"],
         "new-cap": [2, { "newIsCap": true }],
         "global-require": 0,

@@ -1,24 +1,26 @@
-const Generator = require("yeoman-generator");
-const pkg = require("../package.json");
-const chalk = require("chalk");
-const prompt = require("prompt");
-const fs = require("fs");
-const path = require("path");
-const mkdir = require("mkdirp");
-const prettier = require("prettier");
-const vfs = require("vinyl-fs");
-const { getInstalledPathSync } = require("get-installed-path");
+const Generator = require('yeoman-generator');
+const pkg = require('../package.json');
+const ora = require('ora');
+const chalk = require('chalk');
+const prompt = require('prompt');
+const fs = require('fs');
+const path = require('path');
+const mkdir = require('mkdirp');
+const prettier = require('prettier');
+const vfs = require('vinyl-fs');
+const { getInstalledPathSync } = require('get-installed-path');
+const { exec } = require('child_process');
 
 const prettierConfig = {
     tabWidth: 4,
     useTabs: false,
     singleQuote: false,
     bracketSpacing: true,
-    parser: "json"
+    parser: 'json'
 };
 
 function copyFolder(from, to) {
-    from += "/**/*.*";
+    from += '/**/*.*';
     vfs.src(from).pipe(vfs.dest(to));
 }
 
@@ -27,7 +29,7 @@ module.exports = class extends Generator {
         super(args, opts);
 
         // Next, add your custom code
-        this.option("babel"); // This method adds support for a `--babel` flag
+        this.option('babel'); // This method adds support for a `--babel` flag
 
         // user options
         this.userOptions = {};
@@ -42,64 +44,64 @@ module.exports = class extends Generator {
         const that = this;
         const done = this.async();
 
-        prompt.message = chalk.gray(" question");
-        prompt.delimiter = ":";
+        prompt.message = chalk.gray(' question');
+        prompt.delimiter = ':';
         prompt.start();
 
         prompt.get(
             {
                 properties: {
                     name: {
-                        description: chalk.white.bold("name"),
-                        type: "string",
+                        description: chalk.white.bold('name'),
+                        type: 'string',
                         pattern: /^[a-z0-9-_]+$/,
-                        message: "name must be lower-cased letters",
+                        message: 'name must be lower-cased letters',
                         hidden: false,
-                        replace: "*",
-                        default: "",
+                        replace: '*',
+                        default: '',
                         required: true
                     },
                     description: {
-                        description: chalk.white.bold("description"),
-                        type: "string",
-                        default: "",
+                        description: chalk.white.bold('description'),
+                        type: 'string',
+                        default: '',
                         required: false
                     },
                     main: {
-                        description: chalk.white.bold("main"),
-                        type: "string",
-                        default: "index.js",
+                        description: chalk.white.bold('main'),
+                        type: 'string',
+                        default: 'index.js',
                         required: false
                     },
                     author: {
-                        description: chalk.white.bold("author (name <email>)"),
-                        type: "string",
-                        default: "",
+                        description: chalk.white.bold('author (name <email>)'),
+                        type: 'string',
+                        default: '',
                         required: false
                     },
                     license: {
-                        description: chalk.white.bold("license"),
-                        type: "string",
-                        default: "MIT",
+                        description: chalk.white.bold('license'),
+                        type: 'string',
+                        default: 'MIT',
                         required: false
                     }
                 }
             },
             function(err, result) {
                 if (err) {
-                    if (err.message !== "canceled") throw err;
+                    if (err.message !== 'canceled') throw err;
                 }
                 that.userOptions = Object.assign(
                     {
-                        version: "1.0.0",
-                        description: "",
-                        main: "index.js",
-                        author: "",
-                        license: "MIT"
+                        version: '1.0.0',
+                        description: '',
+                        main: 'index.js',
+                        author: '',
+                        license: 'MIT'
                     },
                     result
                 );
-                done("");
+                done('');
             }
         );
     }
@@ -114,10 +116,10 @@ module.exports = class extends Generator {
 
         mkdir.sync(folder);
 
-        const templatePkg = require("./archive/package.json");
+        const templatePkg = require('./archive/package.json');
         const json = Object.assign(templatePkg, this.userOptions);
         fs.writeFileSync(
-            path.resolve(process.cwd(), folder + "/package.json"),
+            path.resolve(process.cwd(), folder + '/package.json'),
             prettier.format(JSON.stringify(json), prettierConfig)
         );
     }
@@ -129,17 +131,17 @@ module.exports = class extends Generator {
         const baseDir = path.resolve(process.cwd(), this.userOptions.name);
         const templateFolder = path.resolve(
             getInstalledPathSync(pkg.name),
-            "app/archive"
+            'app/archive'
         );
 
-        ["build", "config", "src", "typings"].forEach(function(folder) {
+        ['build', 'config', 'src', 'typings'].forEach(function(folder) {
             copyFolder(
                 path.resolve(templateFolder, folder),
                 path.resolve(baseDir, folder)
             );
         });
 
-        ["postcss.config.js", "tsconfig.json"].forEach(function(file) {
+        ['postcss.config.js', 'tsconfig.json'].forEach(function(file) {
             fs.copyFileSync(
                 path.resolve(templateFolder, file),
                 path.resolve(baseDir)
@@ -147,17 +149,39 @@ module.exports = class extends Generator {
         });
 
         [
-            "babelrc",
-            "gitignore",
-            "prettierrc",
-            "stylelintrc",
-            "tslintrc.json"
+            'babelrc',
+            'gitignore',
+            'prettierrc',
+            'stylelintrc',
+            'tslintrc.json'
         ].forEach(function(file) {
             fs.copyFileSync(
                 path.resolve(templateFolder, file),
-                path.resolve(baseDir, "." + file)
+                path.resolve(baseDir, '.' + file)
             );
         });
+    }
+
+    yarn() {
+        const spinner = ora();
+        spinner.start();
+        spinner.text = chalk.white('Install packages...');
+        const done = this.async();
+        const { yarn, name } = this.userOptions;
+        exec(
+            yarn.toLowerCase() === 'y'
+                ? `cd ${name} && yarn`
+                : `cd ${name} && npm install`,
+            error => {
+                spinner.stop();
+                if (error) {
+                    this.hasError = true;
+                    done(error);
+                } else {
+                    done();
+                }
+            }
+        );
     }
 
     end() {
