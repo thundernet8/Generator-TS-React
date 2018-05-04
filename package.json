@@ -1,6 +1,6 @@
 {
     "name": "generator-ts-react",
-    "version": "1.2.6",
+    "version": "1.3.0",
     "description": "A yeoman generator of helping to init your React/TypeScript project",
     "main": "index.js",
     "repository": "git@github.com:thundernet8/Generator-TS-React.git",

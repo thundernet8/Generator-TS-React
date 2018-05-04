@@ -31,13 +31,6 @@ const getPlugins = function() {
             meta: "",
             htmlDom: "",
             state: ""
-        }),
-        new HtmlWebpackPlugin({
-            filename: path.resolve(__dirname, "../dist/default.nj"),
-            template: "src/index.html",
-            inject: true,
-            vendersName: vendersConfig.venders.js,
-            htmlDom: "<%- markup %>"
         })
     ];
 
