@@ -118,7 +118,8 @@ module.exports = class extends Generator {
                         description: '',
                         main: 'index.js',
                         author: '',
-                        license: 'MIT'
+                        license: 'MIT',
+                        yarn: 'n'
                     },
                     result
                 );
@@ -145,15 +146,13 @@ module.exports = class extends Generator {
         const done = this.async();
         const folder = this.userOptions.name;
         const appPath = path.resolve(process.cwd(), folder);
+        /* eslint-disable */
         const unzipStream = unzip.Extract({
             path: path.resolve(process.cwd(), './')
         });
+        /* eslint-disable */
         fs
-            .createReadStream(
-                path.resolve(
-                    __dirname, './_archive.zip'
-                )
-            )
+            .createReadStream(path.resolve(__dirname, './_archive.zip'))
             .pipe(unzipStream);
         unzipStream.on('close', () => {
             mv(
