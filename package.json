@@ -17,21 +17,42 @@
         "app"
     ],
     "scripts": {
+        "build": "node build/build.js",
+        "prepublishOnly": "npm run build",
+        "precommit-msg": "echo 'Pre-commit checks...' && exit 0",
+        "lint-staged": "lint-staged",
+        "lint-staged:script": "eslint --fix -c .eslintrc",
+        "lint-staged:format": "prettier --write",
         "lint": "eslint --ext .js app/index.js"
+    },
+    "pre-commit": [
+        "precommit-msg",
+        "lint-staged"
+    ],
+    "lint-staged": {
+        "app/index.js": [
+            "lint-staged:format",
+            "lint-staged:script",
+            "git add"
+        ]
     },
     "dependencies": {
         "chalk": "^2.3.1",
         "get-installed-path": "^4.0.8",
         "mkdirp": "^0.5.1",
+        "mv": "^2.1.1",
         "ora": "^2.0.0",
         "prettier": "^1.10.2",
         "prompt": "^1.0.0",
-        "vinyl-fs": "^3.0.2",
+        "unzip": "^0.1.11",
+        "update-check": "^1.4.0",
         "yeoman-generator": "^2.0.3"
     },
     "devDependencies": {
         "eslint": "^4.18.1",
         "eslint-config-airbnb-base": "^12.1.0",
-        "eslint-plugin-import": "^2.9.0"
+        "eslint-plugin-import": "^2.9.0",
+        "lint-staged": "^6.1.1",
+        "pre-commit": "^1.2.2"
     }
 }
