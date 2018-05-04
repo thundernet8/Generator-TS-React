@@ -7,8 +7,9 @@ const fs = require('fs');
 const path = require('path');
 const mkdir = require('mkdirp');
 const prettier = require('prettier');
-const vfs = require('vinyl-fs');
-const { getInstalledPathSync } = require('get-installed-path');
+// const { getInstalledPathSync } = require('get-installed-path');
+const unzip = require('unzip');
+const mv = require('mv');
 const { exec } = require('child_process');
 
 const prettierConfig = {
@@ -18,11 +19,6 @@ const prettierConfig = {
     bracketSpacing: true,
     parser: 'json'
 };
-
-function copyFolder(from, to) {
-    from += '/**/*.*';
-    vfs.src(from).pipe(vfs.dest(to));
-}
 
 module.exports = class extends Generator {
     constructor(args, opts) {
@@ -34,6 +30,25 @@ module.exports = class extends Generator {
         // user options
         this.userOptions = {};
         this.hasError = false;
+    }
+
+    checkUpdate() {
+        const check = require('update-check')(pkg);
+        const done = this.async();
+
+        check
+            .then(update => {
+                if (update) {
+                    const text = `The latest version is ${
+                        update.latest
+                    }. Please update!\n`;
+                    console.log(chalk.bold.red(text));
+                }
+                done();
+            })
+            .catch(() => {
+                done();
+            });
     }
 
     info() {
@@ -84,6 +99,12 @@ module.exports = class extends Generator {
                         type: 'string',
                         default: 'MIT',
                         required: false
+                    },
+                    yarn: {
+                        description: chalk.white.bold('use yarn(Y/n)'),
+                        type: 'string',
+                        default: 'n',
+                        required: false
                     }
                 }
             },
@@ -106,7 +127,7 @@ module.exports = class extends Generator {
         );
     }
 
-    writePkg() {
+    mkFolder() {
         const folder = this.userOptions.name;
         if (fs.existsSync(folder)) {
             console.log(chalk.red.bold(`\n folder ${folder} was existed`));
@@ -115,51 +136,59 @@ module.exports = class extends Generator {
         }
 
         mkdir.sync(folder);
-
-        const templatePkg = require('./archive/package.json');
-        const json = Object.assign(templatePkg, this.userOptions);
-        fs.writeFileSync(
-            path.resolve(process.cwd(), folder + '/package.json'),
-            prettier.format(JSON.stringify(json), prettierConfig)
-        );
     }
 
-    copyFiles() {
-        if (this.hasError) {
-            return false;
-        }
-        const baseDir = path.resolve(process.cwd(), this.userOptions.name);
-        const templateFolder = path.resolve(
-            getInstalledPathSync(pkg.name),
-            'app/archive'
+    unzipFiles() {
+        const spinner = ora();
+        spinner.start();
+        spinner.text = chalk.white('Unarchive project files...');
+        const done = this.async();
+        const folder = this.userOptions.name;
+        const appPath = path.resolve(process.cwd(), folder);
+        const unzipStream = unzip.Extract({
+            path: path.resolve(process.cwd(), './')
+        });
+        fs
+            .createReadStream(
+                path.resolve(
+                    __dirname, './_archive.zip'
+                )
+            )
+            .pipe(unzipStream);
+        unzipStream.on('close', () => {
+            mv(
+                path.resolve(process.cwd(), '_archive'),
+                appPath,
+                { mkdirp: true },
+                function(error) {
+                    spinner.stop();
+                    if (error) {
+                        this.hasError = true;
+                        done(error);
+                    } else {
+                        done();
+                    }
+                }
+            );
+        });
+        unzipStream.on('error', error => {
+            spinner.stop();
+            if (error) {
+                this.hasError = true;
+            }
+            done(error);
+        });
+    }
+
+    writePkg() {
+        const folder = this.userOptions.name;
+        const pkgPath = path.resolve(process.cwd(), folder, 'package.json');
+        const templatePkg = require(pkgPath);
+        const json = Object.assign(templatePkg, this.userOptions);
+        fs.writeFileSync(
+            pkgPath,
+            prettier.format(JSON.stringify(json), prettierConfig)
         );
-
-        ['build', 'config', 'src', 'typings'].forEach(function(folder) {
-            copyFolder(
-                path.resolve(templateFolder, folder),
-                path.resolve(baseDir, folder)
-            );
-        });
-
-        ['postcss.config.js', 'tsconfig.json'].forEach(function(file) {
-            fs.copyFileSync(
-                path.resolve(templateFolder, file),
-                path.resolve(baseDir)
-            );
-        });
-
-        [
-            'babelrc',
-            'gitignore',
-            'prettierrc',
-            'stylelintrc',
-            'tslintrc.json'
-        ].forEach(function(file) {
-            fs.copyFileSync(
-                path.resolve(templateFolder, file),
-                path.resolve(baseDir, '.' + file)
-            );
-        });
     }
 
     yarn() {
