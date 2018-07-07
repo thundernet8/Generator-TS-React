@@ -51,7 +51,7 @@ const config = {
         library: IS_PROD ? "[name]_[chunkhash:8]" : "[name]"
     },
     resolve: {
-        modules: ["node_modules", path.resolve(__dirname, "../src/shared")]
+        modules: ["node_modules"]
     },
     plugins: getPlugins()
 };
